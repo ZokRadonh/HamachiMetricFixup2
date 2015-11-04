@@ -238,7 +238,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
-            this.Text = "Zok\'s Hamachi Metric Fixer - arctics.net";
+            this.Text = "Zok\'s Hamachi Metric Fixer - zok.xyz";
             this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.MainForm_HelpButtonClicked);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);

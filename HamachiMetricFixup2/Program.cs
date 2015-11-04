@@ -24,7 +24,7 @@ namespace HamachiMetricFixup2
                 {
                     string[] jobs = new string[args.Length - 1];
                     Array.Copy(args, 1, jobs, 0, args.Length - 1);
-                    MetricFixer.Instance.ExecuteJobs(MainForm.CreateListOfStringJobs(jobs));
+                    MetricFixer.ExecuteJobs(MainForm.CreateListOfStringJobs(jobs));
                     return;
                 }
             }

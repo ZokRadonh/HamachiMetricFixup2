@@ -6,7 +6,7 @@ using System.Management;
 
 namespace HamachiMetricFixup2
 {
-    public class NetworkAdapter : HamachiMetricFixup2.IManagementWrapper
+    class NetworkAdapter : HamachiMetricFixup2.IManagementWrapper
     {
         private ManagementObject _mo;
 

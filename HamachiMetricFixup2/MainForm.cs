@@ -13,14 +13,13 @@ namespace HamachiMetricFixup2
     public partial class MainForm : Form
     {
 
-        public static MainForm Instance;
+        private readonly List<MetricJob> _fixJobs = new List<MetricJob>();
 
-        private List<MetricJob> fixJobs = new List<MetricJob>();
+        private List<NetworkAdapter> Adapters { get; } = new List<NetworkAdapter>();
 
         public MainForm()
         {
             InitializeComponent();
-            Instance = this;
 
             // add shield if needed
             if (!IsAdmin())
@@ -34,16 +33,25 @@ namespace HamachiMetricFixup2
 
         private void LoadWMIObjects()
         {
-
-            radioAdapter.Tag = MetricFixer.Instance.Adapters;
+            Adapters.Clear();
+            // fetch adapters from system
+            ManagementClass objMC = new ManagementClass("Win32_NetworkAdapterConfiguration");
+            ManagementObjectCollection coll = objMC.GetInstances();
+            foreach (ManagementObject obj in coll)
+            {
+                if (!(bool)obj["IPEnabled"]) continue;
+                NetworkAdapter adapter = new NetworkAdapter(obj);
+                Adapters.Add(adapter);
+            }
+            radioAdapter.Tag = Adapters;
             radioRoutingTable.Tag = MetricFixer.Instance.RoutingTable;
 
             // show adapters in listboxes
             cmbDevices.Items.Clear();
             listBox1.Items.Clear();
-            cmbDevices.Items.AddRange(MetricFixer.Instance.Adapters.ToArray());
+            cmbDevices.Items.AddRange(Adapters.ToArray());
             if (radioRoutingTable.Checked) listBox1.Items.AddRange(MetricFixer.Instance.RoutingTable.ToArray());
-            else listBox1.Items.AddRange(MetricFixer.Instance.Adapters.ToArray());
+            else listBox1.Items.AddRange(Adapters.ToArray());
         }
 
         [DllImport("user32")]
@@ -77,16 +85,16 @@ namespace HamachiMetricFixup2
         private void cmbDevices_SelectedIndexChanged(object sender, EventArgs ea)
         {
 
-            labTargetMetric.Text = MetricFixer.Instance.CreateFixJobs((NetworkAdapter)cmbDevices.SelectedItem, fixJobs).ToString();
+            labTargetMetric.Text = MetricFixer.CreateFixJobs(((NetworkAdapter)cmbDevices.SelectedItem).InterfaceNumber, _fixJobs).ToString();
 
-            labRoutesToFix.Text = fixJobs.Count.ToString();
+            labRoutesToFix.Text = _fixJobs.Count.ToString();
             labMaxMetric.Text = "?";
 
         }
 
         private void bFixit_Click(object sender, EventArgs e)
         {
-            if (fixJobs.Count == 0)
+            if (_fixJobs.Count == 0)
             {
                 MessageBox.Show(this, "Die Metriken scheinen so korrekt zu sein, um über " + cmbDevices.SelectedItem.ToString() + " zu spielen.\r\nKeine Metrik-Änderungen sind notwendig.", "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -102,11 +110,11 @@ namespace HamachiMetricFixup2
             {
                 if (IsAdmin())
                 {
-                    MetricFixer.Instance.ExecuteJobs(fixJobs);
+                    MetricFixer.ExecuteJobs(_fixJobs);
                 }
                 else
                 {
-                    StartElevated("-execute " + CreateStringOfJobList(fixJobs));
+                    StartElevated("-execute " + CreateStringOfJobList(_fixJobs));
                 }
             });
             fix.BeginInvoke(new AsyncCallback(FixComplete), null);
@@ -121,10 +129,10 @@ namespace HamachiMetricFixup2
                 {
                     int device = cmbDevices.SelectedIndex;
                     bFixit.Enabled = true;
-                    MetricFixer.Instance.LoadWMIObjects();
+                    MetricFixer.Instance.LoadWmiObjects();
                     LoadWMIObjects();
                     cmbDevices.SelectedIndex = device;
-                    if (fixJobs.Count == 0) MessageBox.Show(this, "Metriken wurden erfolgreich gesetzt.", "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (_fixJobs.Count == 0) MessageBox.Show(this, "Metriken wurden erfolgreich gesetzt.", "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     else MessageBox.Show(this, "Eine oder mehrere Routen konnten nicht hinreichend manipuliert werden.", "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }));
             }

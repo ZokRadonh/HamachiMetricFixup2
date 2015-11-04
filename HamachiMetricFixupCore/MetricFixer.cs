@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Management;
 using System.Windows.Forms;
 
@@ -9,37 +7,24 @@ namespace HamachiMetricFixup2
 {
     public class MetricFixer
     {
-        public const string ROUTE_TO_FIX = "255.255.255.255";
+        private const string RouteToFix = "255.255.255.255";
 
-        public List<NetworkAdapter> Adapters { get; private set; }
+       
 
-        public List<RoutingEntry> RoutingTable { get; private set; }
+        public List<RoutingEntry> RoutingTable { get; } = new List<RoutingEntry>();
 
         private static MetricFixer _instance;
-        public static MetricFixer Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MetricFixer();
-                }
-                return _instance;
-            }
-        }
+        public static MetricFixer Instance => _instance ?? (_instance = new MetricFixer());
 
-        public MetricFixer()
+        private MetricFixer()
         {
-            Adapters = new List<NetworkAdapter>();
-            RoutingTable = new List<RoutingEntry>();
-            LoadWMIObjects();
+            LoadWmiObjects();
         }
-
 
         /// <summary>
         /// Is called in constructor
         /// </summary>
-        public void LoadWMIObjects()
+        public void LoadWmiObjects()
         {
             RoutingTable.Clear();
             // fetch routing tables from system
@@ -50,32 +35,22 @@ namespace HamachiMetricFixup2
                 RoutingEntry entry = new RoutingEntry(obj);
                 RoutingTable.Add(entry);
             }
-
-            Adapters.Clear();
-            // fetch adapters from system
-            ManagementClass objMC = new ManagementClass("Win32_NetworkAdapterConfiguration");
-            ManagementObjectCollection coll = objMC.GetInstances();
-            foreach (ManagementObject obj in coll)
-            {
-                if (!(bool)obj["IPEnabled"]) continue;
-                NetworkAdapter adapter = new NetworkAdapter(obj);
-                Adapters.Add(adapter);
-            }
         }
+
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="gameAdapter"></param>
         /// <returns>Returns target metric</returns>
-        public int CreateFixJobs(NetworkAdapter gameAdapter, List<MetricJob> fixJobs)
+        public static int CreateFixJobs(int gameAdapter, List<MetricJob> fixJobs)
         {
 
-            //= routingTable.Find((e) => e.InterfaceIndex == gameAdapter.InterfaceNumber && e.Destination == ROUTE_TO_FIX && e.Mask == ROUTE_TO_FIX);
+            //= routingTable.Find((e) => e.InterfaceIndex == gameAdapter.InterfaceNumber && e.Destination == RouteToFix && e.Mask == RouteToFix);
             //RoutingEntry gameRouting = (from e in routingTable
             //                           where e.InterfaceIndex == gameAdapter.InterfaceNumber &&
-            //                           e.Destination == ROUTE_TO_FIX &&
-            //                           e.Mask == ROUTE_TO_FIX
+            //                           e.Destination == RouteToFix &&
+            //                           e.Mask == RouteToFix
             //                           select e).FirstOrDefault();
 
             int targetMetric = GetMetricOfAdapter(gameAdapter) + 10;
@@ -84,10 +59,10 @@ namespace HamachiMetricFixup2
 
             fixJobs.Clear();
 
-            foreach (var route in from r in MetricFixer.Instance.RoutingTable where r.Destination == MetricFixer.ROUTE_TO_FIX && r.Mask == MetricFixer.ROUTE_TO_FIX select r)
+            foreach (var route in from r in Instance.RoutingTable where r.Destination == RouteToFix && r.Mask == RouteToFix select r)
             {
                 if (route.Metric > maxMetric) maxMetric = route.Metric;
-                if (route.InterfaceIndex != gameAdapter.InterfaceNumber)
+                if (route.InterfaceIndex != gameAdapter)
                 {
                     if (route.Metric < targetMetric) fixJobs.Add(new MetricJob(route.InterfaceIndex, targetMetric));
                 }
@@ -96,27 +71,27 @@ namespace HamachiMetricFixup2
             return targetMetric;
         }
 
-        private int GetMetricOfAdapter(NetworkAdapter adapter)
+        private static int GetMetricOfAdapter(int adapter)
         {
-            return (from e in MetricFixer.Instance.RoutingTable
-                    where e.InterfaceIndex == adapter.InterfaceNumber &&
-                    e.Destination == MetricFixer.ROUTE_TO_FIX &&
-                    e.Mask == MetricFixer.ROUTE_TO_FIX
+            return (from e in Instance.RoutingTable
+                    where e.InterfaceIndex == adapter &&
+                    e.Destination == RouteToFix &&
+                    e.Mask == RouteToFix
                     select e.Metric).FirstOrDefault();
         }
 
-        public void ExecuteJobs(List<MetricJob> jobs)
+        public static void ExecuteJobs(IEnumerable<MetricJob> jobs)
         {
             foreach (var job in jobs)
             {
-                RoutingEntry entry = MetricFixer.Instance.RoutingTable.Find((r) => r.InterfaceIndex == job.InterfaceID && r.Destination == MetricFixer.ROUTE_TO_FIX && r.Mask == MetricFixer.ROUTE_TO_FIX);
+                RoutingEntry entry = Instance.RoutingTable.Find(r => r.InterfaceIndex == job.InterfaceID && r.Destination == RouteToFix && r.Mask == RouteToFix);
                 if (entry != null)
                 {
                     entry.Metric = job.TargetMetric;
                     entry.Save();
                 }
                 else
-                    MessageBox.Show("Keine " + MetricFixer.ROUTE_TO_FIX + " Route für Netzwerkkarte gefunden. ID: " + job.InterfaceID, "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Keine " + RouteToFix + " Route für Netzwerkkarte gefunden. ID: " + job.InterfaceID, "Hamachi Metric Fixer", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

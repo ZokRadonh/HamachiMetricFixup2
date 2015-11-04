@@ -31,12 +31,12 @@ namespace HamachiMetricFixup2
             set { _mo["InterfaceIndex"] = value; }
         }
 
-        public NetworkAdapter Interface
-        {
-            get { 
-                return MetricFixer.Instance.Adapters.Find((a) => a.InterfaceNumber == InterfaceIndex);
-            }
-        }
+        //public NetworkAdapter Interface
+        //{
+        //    get { 
+        //        return MetricFixer.Instance.Adapters.Find((a) => a.InterfaceNumber == InterfaceIndex);
+        //    }
+        //}
 
         public string Mask
         {
@@ -71,8 +71,7 @@ namespace HamachiMetricFixup2
 
         public override string ToString()
         {
-            if (Interface == null) return InterfaceIndex + "->" + Caption;
-            else return Interface.Name + "->" + Caption;
+            return InterfaceIndex + "->" + Caption;
         }
 
         public void Save()
