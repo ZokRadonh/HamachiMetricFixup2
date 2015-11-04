@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("HamachiMetricFixup 2")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("arctics.net")]
+[assembly: AssemblyCompany("zok.xyz")]
 [assembly: AssemblyProduct("HamachiMetricFixup2")]
 [assembly: AssemblyCopyright("Copyright © 2010 ZokRadonh")]
 [assembly: AssemblyTrademark("")]

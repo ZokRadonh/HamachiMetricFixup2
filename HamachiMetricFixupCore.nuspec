@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>HamachiMetricFixupCore</id>
+    <version>$version$</version>
+    <title>Hamachi Metric Fixup</title>
+    <authors>Andre Zoledziowski</authors>
+    <owners>Bil Simser</owners>
+    <licenseUrl>https://raw.githubusercontent.com/ZokRadonh/HamachiMetricFixup2/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/ZokRadonh/HamachiMetricFixup2</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Reconfigures metrics to route most local broadcast game discovery packets through specified adapter.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright &#x00A9; Andre Zoledziowski.  All rights reserved.</copyright>
+    <tags>hamachi metric fix game discovery</tags>
+  </metadata>
+  <files>
+	<file src="HamachiMetricFixupCore\bin\$configuration$\HamachiMetricFixupCore.dll" target="lib\net40\" />
+  </files>
+</package>

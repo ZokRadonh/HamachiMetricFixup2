@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamachiMetricFixup2", "Hama
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamachiMetricFixupCore", "HamachiMetricFixupCore\HamachiMetricFixupCore.csproj", "{438F5B8B-03DE-434A-A0F9-0B91D4F58BD5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F3CE2902-8AAD-4D3E-90BC-53CA0C9E31D7}"
+	ProjectSection(SolutionItems) = preProject
+		HamachiMetricFixupCore.nuspec = HamachiMetricFixupCore.nuspec
+		LICENSE.md = LICENSE.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
